@@ -1,29 +1,34 @@
+
 package com.example.sananismayilov.onlinedictionary.RecylerView;
 
-import java.io.Serializable;
+import java.util.List;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
-public class ConteynerToWord  implements Serializable {
-    private String az_word;
-    private String en_word;
 
-    public ConteynerToWord(String az_word, String en_word) {
-        this.az_word = az_word;
-        this.en_word = en_word;
+public class ConteynerToWord {
+
+    @SerializedName("dictionary")
+    @Expose
+    private List<Dictionary> dictionary;
+    @SerializedName("success")
+    @Expose
+    private Integer success;
+
+    public List<Dictionary> getDictionary() {
+        return dictionary;
     }
 
-    public String getAz_word() {
-        return az_word;
+    public void setDictionary(List<Dictionary> dictionary) {
+        this.dictionary = dictionary;
     }
 
-    public void setAz_word(String az_word) {
-        this.az_word = az_word;
+    public Integer getSuccess() {
+        return success;
     }
 
-    public String getEn_word() {
-        return en_word;
+    public void setSuccess(Integer success) {
+        this.success = success;
     }
 
-    public void setEn_word(String en_word) {
-        this.en_word = en_word;
-    }
 }

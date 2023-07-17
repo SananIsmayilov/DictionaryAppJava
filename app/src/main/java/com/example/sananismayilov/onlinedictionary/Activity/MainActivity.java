@@ -1,6 +1,7 @@
 package com.example.sananismayilov.onlinedictionary.Activity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -11,26 +12,34 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sananismayilov.onlinedictionary.R;
 import com.example.sananismayilov.onlinedictionary.RecylerView.Adaptertorecylerview;
 import com.example.sananismayilov.onlinedictionary.RecylerView.ConteynerToWord;
+import com.example.sananismayilov.onlinedictionary.RecylerView.Dictionary;
+import com.example.sananismayilov.onlinedictionary.Retrofit.RetrofitUtils;
+import com.example.sananismayilov.onlinedictionary.Retrofit.Retrofitinterface;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 RecyclerView recyclerView;
 Adaptertorecylerview adaptertorecylerview;
-ArrayList<ConteynerToWord> conteynerToWords;
+List<Dictionary> conteynerToWords;
 ProgressBar progressBar;
 Button button;
+Retrofitinterface retrofitinterface;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,43 +47,31 @@ Button button;
         progressBar = findViewById(R.id.progressBar);
         progressBar.setVisibility(View.VISIBLE);
         recyclerView = findViewById(R.id.recylerview);
+        retrofitinterface = RetrofitUtils.retrofitinterface();
         getData();
 
     }
 
 
     public void getData(){
-        conteynerToWords = new ArrayList<>();
-        String url = "https://senan2.000webhostapp.com/DictionaryApp/getdata.php";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                try {
-                    JSONObject object = new JSONObject(response);
-                    JSONArray array = object.getJSONArray("dictionary");
-                    for(int i=0;i<array.length();i++){
-                        JSONObject object1 = array.getJSONObject(i);
-                        ConteynerToWord conteyner = new ConteynerToWord(object1.getString("text_az"),object1.getString("text_en"));
-                        conteynerToWords.add(conteyner);
-                    }
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-                progressBar.setVisibility(View.INVISIBLE);
-                adaptertorecylerview = new Adaptertorecylerview(conteynerToWords);
-                recyclerView.setHasFixedSize(true);
-                recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-                recyclerView.setAdapter(adaptertorecylerview);
+    retrofitinterface.getdata().enqueue(new Callback<ConteynerToWord>() {
+        @Override
+        public void onResponse(Call<ConteynerToWord> call, Response<ConteynerToWord> response) {
+            conteynerToWords = response.body().getDictionary();
+            adaptertorecylerview = new Adaptertorecylerview(conteynerToWords);
 
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
-            }
-        });
+            recyclerView.setHasFixedSize(true);
+            recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+            recyclerView.setAdapter(adaptertorecylerview);
+            progressBar.setVisibility(View.INVISIBLE);
+        }
 
-        Volley.newRequestQueue(this).add(stringRequest);
+        @Override
+        public void onFailure(Call<ConteynerToWord> call, Throwable t) {
+
+        }
+    });
+
 
     }
 }
